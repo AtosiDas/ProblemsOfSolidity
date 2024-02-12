@@ -13,7 +13,9 @@ contract Roulette is ERC20 {
     address[] OddPublic;
     address[] OnDigitPublic;
     mapping(address => uint256) NumberDigit; //In which digit they bet
-    mapping(address => uint256) TokenAmount; //How much amount of tokens is being used for bets.
+    mapping(address => uint256) TokenAmountEven; //How much amount of tokens is being used for bets.
+    mapping(address => uint256) TokenAmountOdd;
+    mapping(address => uint256) TokenAmountOnDigit;
     //mapping(address => uint256) public TokensPlayers;
     constructor() ERC20("Roulette", "RLT") {
         owner = msg.sender;
@@ -39,9 +41,7 @@ contract Roulette is ERC20 {
         //payable(address(this)).transfer(amount);
         emit Transfer(msg.sender, 0x0000000000000000000000000000000000000000, betAmount);
         EvenPublic.push(msg.sender);
-       
-        
-        TokenAmount[msg.sender] = betAmount;
+        TokenAmountEven[msg.sender] = betAmount;
     }
 
     function placeBetOdd(uint256 betAmount) public {
@@ -51,7 +51,7 @@ contract Roulette is ERC20 {
         emit Transfer(msg.sender, 0x0000000000000000000000000000000000000000, betAmount);
         
         OddPublic.push(msg.sender);
-        TokenAmount[msg.sender] = betAmount;
+        TokenAmountOdd[msg.sender] = betAmount;
     }
 
     function placeBetOnNumber(uint256 betAmount, uint256 number) public {
@@ -63,7 +63,7 @@ contract Roulette is ERC20 {
         betDetails[number].push(msg.sender);
         OnDigitPublic.push(msg.sender);
         NumberDigit[msg.sender] = number;
-        TokenAmount[msg.sender] = betAmount;
+        TokenAmountOnDigit[msg.sender] = betAmount;
     }
 
     function spinWheel() public {
@@ -88,7 +88,7 @@ contract Roulette is ERC20 {
         uint value;
         for(uint i = 0; i < OnDigitPublic.length; i++){
             if(NumberDigit[OnDigitPublic[i]] == SpinWheelResult){
-                value = TokenAmount[OnDigitPublic[i]] + (TokenAmount[OnDigitPublic[i]]*1800)/100;
+                value = TokenAmountOnDigit[OnDigitPublic[i]] + (TokenAmountOnDigit[OnDigitPublic[i]]*1800)/100;
                 _mint(OnDigitPublic[i], value);
                 emit Transfer(0x0000000000000000000000000000000000000000, OnDigitPublic[i], value);
                 
@@ -96,7 +96,7 @@ contract Roulette is ERC20 {
         }
         if(SpinWheelResult % 2 == 0){
             for(uint i = 0; i < EvenPublic.length; i++){
-                value = TokenAmount[EvenPublic[i]] + (TokenAmount[EvenPublic[i]]*80)/100;
+                value = TokenAmountEven[EvenPublic[i]] + (TokenAmountEven[EvenPublic[i]]*80)/100;
                 _mint(EvenPublic[i], value);
                 emit Transfer(0x0000000000000000000000000000000000000000, EvenPublic[i], value);
                 
@@ -104,7 +104,7 @@ contract Roulette is ERC20 {
         }
         else{
             for(uint i = 0; i < OddPublic.length; i++){
-                value = TokenAmount[OddPublic[i]] + (TokenAmount[OddPublic[i]]*80)/100;
+                value = TokenAmountOdd[OddPublic[i]] + (TokenAmountOdd[OddPublic[i]]*80)/100;
                 _mint(OddPublic[i], value);
                 emit Transfer(0x0000000000000000000000000000000000000000, OddPublic[i], value);
                 
@@ -128,7 +128,7 @@ contract Roulette is ERC20 {
         uint[] memory arr;
         uint index;
         for(uint i = 0; i < EvenPublic.length; i++){
-            arr[index] = TokenAmount[EvenPublic[i]];
+            arr[index] = TokenAmountEven[EvenPublic[i]];
             index++;
         }
         return (EvenPublic,arr);
@@ -142,7 +142,7 @@ contract Roulette is ERC20 {
         uint[] memory arr;
         uint index;
         for(uint i = 0; i < OddPublic.length; i++){
-            arr[index] = TokenAmount[OddPublic[i]];
+            arr[index] = TokenAmountOdd[OddPublic[i]];
             index++;
         }
         return (OddPublic,arr);
@@ -166,7 +166,7 @@ contract Roulette is ERC20 {
         uint[] memory arr1;
         uint index1;
         for(uint i = 0; i < OnDigitPublic.length; i++){
-            arr1[index1] = TokenAmount[OnDigitPublic[i]];
+            arr1[index1] = TokenAmountOnDigit[OnDigitPublic[i]];
             index1++;
         }
         return (OnDigitPublic,arr,arr1);
